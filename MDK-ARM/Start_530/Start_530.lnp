@@ -1,0 +1,24 @@
+--cpu Cortex-M3
+"start_530\startup_stm32f103xb.o"
+"start_530\main.o"
+"start_530\stm32f1xx_it.o"
+"start_530\stm32f1xx_hal_msp.o"
+"start_530\stm32f1xx_hal_gpio_ex.o"
+"start_530\stm32f1xx_hal_can.o"
+"start_530\stm32f1xx_hal_tim.o"
+"start_530\stm32f1xx_hal_tim_ex.o"
+"start_530\stm32f1xx_hal.o"
+"start_530\stm32f1xx_hal_rcc.o"
+"start_530\stm32f1xx_hal_rcc_ex.o"
+"start_530\stm32f1xx_hal_gpio.o"
+"start_530\stm32f1xx_hal_dma.o"
+"start_530\stm32f1xx_hal_cortex.o"
+"start_530\stm32f1xx_hal_pwr.o"
+"start_530\stm32f1xx_hal_flash.o"
+"start_530\stm32f1xx_hal_flash_ex.o"
+"start_530\stm32f1xx_hal_exti.o"
+"start_530\system_stm32f1xx.o"
+--library_type=microlib --strict --scatter "Start_530\Start_530.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "Start_530.map" -o Start_530\Start_530.axf
