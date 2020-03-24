@@ -37,7 +37,31 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+typedef enum
+{
+	toNop,
+	toOn,
+	toOff
+} BtCommandTypeDef;
+typedef enum
+{
+	btNoCon,
+	btOCon,
+	btOff
+} BtStatusTypeDef;
+typedef struct
+{
+  uint8_t short_resp[8];     
+	uint8_t long_resp[32]; 
+}BtRxMsgTypeDef;
+typedef struct
+{
+	BtCommandTypeDef command;
+	
+	BtRxMsgTypeDef*            pBtRxMsg;     /*!< Pointer to receive structure  */
+	//BtTxMsgTypeDef*            pBtTxMsg;     /*!< Pointer to transmit structure  */
+	uint8_t rx;
+} BtModuleTypeDef;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

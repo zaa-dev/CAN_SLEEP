@@ -7,6 +7,7 @@
 "start_530\stm32f1xx_hal_can.o"
 "start_530\stm32f1xx_hal_tim.o"
 "start_530\stm32f1xx_hal_tim_ex.o"
+"start_530\stm32f1xx_hal_uart.o"
 "start_530\stm32f1xx_hal.o"
 "start_530\stm32f1xx_hal_rcc.o"
 "start_530\stm32f1xx_hal_rcc_ex.o"

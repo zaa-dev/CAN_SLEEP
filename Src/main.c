@@ -44,10 +44,17 @@
 /* Private variables ---------------------------------------------------------*/
 CAN_HandleTypeDef hcan;
 
+UART_HandleTypeDef huart2;
+
 /* USER CODE BEGIN PV */
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 CAN_FilterTypeDef canFilterConfig;
+
+BtModuleTypeDef bt;
+uint8_t len = 6;
+//BtTxMsgTypeDef TxMes;
+BtRxMsgTypeDef RxMes;
 
 uint8_t tx_buf[4] = {0x01, 0xDF, 0xC5, 0xD1};
 uint8_t rx_buf[8] = {0};
@@ -85,6 +92,7 @@ counter_t counter;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_CAN_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 void can_user_settings(void);
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
@@ -136,6 +144,18 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 	HAL_CAN_GetError(hcan);
 	HAL_CAN_ResetError(hcan);
 	counter.can_error++;
+}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+		HAL_UART_Receive_IT(&huart2, RxMes.short_resp, len);
+}
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+
+}
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+
 }
 /* USER CODE END PFP */
 
@@ -214,8 +234,9 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_CAN_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-	
+	HAL_UART_Receive_IT(&huart2, RxMes.short_resp, len);
 	can_user_settings();
 	HAL_CAN_Start(&hcan);
 	HAL_DBGMCU_EnableDBGSleepMode();	//DBGMCU->CR |= DBGMCU_CR_DBG_SLEEP;
@@ -358,6 +379,39 @@ static void MX_CAN_Init(void)
 }
 
 /**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 9600;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -393,12 +447,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA1 PA2 PA3 PA4 
-                           PA5 PA6 PA7 PA8 
-                           PA9 PA10 PA15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4 
-                          |GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8 
-                          |GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_15;
+  /*Configure GPIO pins : PA1 PA4 PA5 PA6 
+                           PA7 PA8 PA9 PA10 
+                           PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6 
+                          |GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10 
+                          |GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
