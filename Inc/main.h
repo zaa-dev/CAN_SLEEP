@@ -62,6 +62,20 @@ typedef struct
 	//BtTxMsgTypeDef*            pBtTxMsg;     /*!< Pointer to transmit structure  */
 	uint8_t rx;
 } BtModuleTypeDef;
+typedef struct 
+{
+	uint8_t Source;
+	uint8_t BtnPrev;
+	uint8_t BtnNext;
+	uint8_t BtnMuteOff;
+	uint8_t BtnMuteOn;
+	uint8_t BtnMuteTgl;
+	uint8_t BtnVolMinus;
+	uint8_t BtnVolPlus;
+	uint8_t BtnCallAnsw;
+	uint8_t BtnCallRej;
+	uint8_t *p[10];
+} MMSCommandsTypeDef;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

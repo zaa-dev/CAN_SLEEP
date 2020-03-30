@@ -59,7 +59,7 @@ BtRxMsgTypeDef RxMes;
 uint8_t tx_buf[4] = {0x01, 0xDF, 0xC5, 0xD1};
 uint8_t rx_buf[8] = {0};
 uint8_t rx_buf_FMI[8][8] = {0};
-uint8_t flag = 0;
+//uint8_t flag = 0;
 uint32_t freq_a, freq_b;
 uint32_t TxMailbox;
 HAL_StatusTypeDef TxStatus;
@@ -86,6 +86,15 @@ typedef struct
 	uint16_t can_error;
 }counter_t;
 counter_t counter;
+typedef struct 
+{
+	uint8_t can_rx;
+}FlagTypeDef;
+FlagTypeDef flag;
+
+MMSCommandsTypeDef mms;
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,6 +135,17 @@ void HAL_CAN_RxFIFO0MsgPendingCallback(CAN_HandleTypeDef* hcan)
 		rx_buf_FMI[RxHeader.FilterMatchIndex][i] = rx_buf[i];
 	}
 	counter.can_rx++;
+	mms.Source = ((rx_buf[1]&0x01)<<1) + ((rx_buf[0]&0x80)>>7);
+	mms.BtnCallAnsw = (rx_buf[1]&0x02)>>1;
+	mms.BtnCallRej = 	(rx_buf[1]&0x04)>>2;
+	mms.BtnPrev = 		(rx_buf[0]&0x40)>>6;
+	mms.BtnNext = 		(rx_buf[0]&0x20)>>5;
+	mms.BtnMuteOff = 	(rx_buf[0]&0x10)>>4;
+	mms.BtnMuteOn = 	(rx_buf[0]&0x08)>>3;
+	mms.BtnMuteTgl = 	(rx_buf[0]&0x04)>>2;
+	mms.BtnVolMinus = (rx_buf[0]&0x02)>>1;
+	mms.BtnVolPlus = 	(rx_buf[1]&0x01);
+	flag.can_rx = 1;
 }
 void HAL_CAN_WakeUpFromRxMsgCallback(CAN_HandleTypeDef *hcan)
 {
@@ -157,6 +177,63 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
 
 }
+void canToUartCommands(MMSCommandsTypeDef* mms_t)
+{
+	/*if (mms_t->Source == 0x02)	//BT is on
+	{*/
+		if (mms_t->BtnCallAnsw)
+		{
+			mms_t->BtnCallAnsw = 0;
+			
+		}			
+		if(mms_t->BtnCallRej)
+		{
+			mms_t->BtnCallRej = 0;
+			
+		}
+		if (mms_t->BtnPrev)
+		{
+			mms_t->BtnPrev = 0;
+			
+		}
+		if (mms_t->BtnNext)
+		{
+			mms_t->BtnNext = 0;
+			
+		}
+		if (mms_t->BtnMuteTgl)
+		{
+			mms_t->BtnMuteTgl = 0;
+			static uint8_t trig = 1;
+			if (trig^=1)	{mms_t->BtnMuteOff = 1;}
+			else					{mms_t->BtnMuteOn = 1;}
+		}
+		if (mms_t->BtnMuteOff)
+		{
+			mms_t->BtnMuteOff = 0;
+			
+		}
+		if (mms_t->BtnMuteOn)
+		{
+			mms_t->BtnMuteOn = 0;
+		
+		}
+		if (mms_t->BtnVolMinus)
+		{
+			mms_t->BtnVolMinus = 0;
+			
+		}
+		if (mms_t->BtnVolPlus)
+		{
+			mms_t->BtnVolPlus = 0;
+		
+		}
+	/*}
+	else if (mms_t->Source == 0x03)	//FM is on
+	{
+	
+	}*/
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -165,28 +242,16 @@ void can_user_settings(void)
 {
 	canFilterConfig.FilterBank = 0;	/*!< Specifies the filter which will be initialized. 
                                        This parameter must be a number between Min_Data = 0 and Max_Data = 13. */
-  canFilterConfig.FilterMode = CAN_FILTERMODE_IDLIST;	//CAN_FILTERMODE_IDLIST or CAN_FILTERMODE_IDMASK
-  canFilterConfig.FilterScale = CAN_FILTERSCALE_16BIT;	//CAN_FILTERSCALE_16BIT or CAN_FILTERSCALE_32BIT 
-  canFilterConfig.FilterIdHigh = 0x00C1 << 5;	// идентификатор №1
-  canFilterConfig.FilterIdLow = 0x00C2 << 5;	// идентификатор №2
-  canFilterConfig.FilterMaskIdHigh = 0x00C3 << 5;	// идентификатор №3
-  canFilterConfig.FilterMaskIdLow = 0x00C4 << 5;	// идентификатор №4
+  canFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;	//CAN_FILTERMODE_IDLIST or CAN_FILTERMODE_IDMASK
+  canFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;	//CAN_FILTERSCALE_16BIT or CAN_FILTERSCALE_32BIT 
+  canFilterConfig.FilterIdHigh = 0x04CE << 5;	// идентификатор №1
+  canFilterConfig.FilterIdLow = 0x0000;	// идентификатор №2
+  canFilterConfig.FilterMaskIdHigh = 0x07FF << 5;	// идентификатор №3
+  canFilterConfig.FilterMaskIdLow = 0x0000;	// идентификатор №4
   canFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
   canFilterConfig.FilterActivation = ENABLE;
   /*canFilterConfig.BankNumber = 0;*/	/*!< Select the start slave bank filter
                                        This parameter must be a number between Min_Data = 0 and Max_Data = 28. */ 
-	HAL_CAN_ConfigFilter(&hcan, &canFilterConfig);
-	
-	canFilterConfig.FilterBank = 1;	/*!< Specifies the filter which will be initialized. 
-                                       This parameter must be a number between Min_Data = 0 and Max_Data = 13. */
-  canFilterConfig.FilterMode = CAN_FILTERMODE_IDLIST;	//CAN_FILTERMODE_IDLIST or CAN_FILTERMODE_IDMASK
-  canFilterConfig.FilterScale = CAN_FILTERSCALE_16BIT;	//CAN_FILTERSCALE_16BIT or CAN_FILTERSCALE_32BIT 
-  canFilterConfig.FilterIdHigh = 0x00D1 << 5;	// идентификатор №1
-  canFilterConfig.FilterIdLow = 0x00D2 << 5;	// идентификатор №2
-  canFilterConfig.FilterMaskIdHigh = 0x00D3 << 5;	// идентификатор №3
-  canFilterConfig.FilterMaskIdLow = 0x00D4 << 5;	// идентификатор №4
-  canFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-  canFilterConfig.FilterActivation = ENABLE;
 	HAL_CAN_ConfigFilter(&hcan, &canFilterConfig);
 	
 	HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING|CAN_IT_ERROR_WARNING|CAN_IT_ERROR_PASSIVE|CAN_IT_BUSOFF|CAN_IT_LAST_ERROR_CODE|CAN_IT_ERROR);
@@ -196,11 +261,11 @@ void can_user_settings(void)
 	HAL_CAN_RegisterCallback(&hcan, HAL_CAN_WAKEUP_FROM_RX_MSG_CB_ID, HAL_CAN_WakeUpFromRxMsgCallback);
 	
 	
-	TxHeader.StdId = 0x0C1;             //
+	TxHeader.StdId = 0x0532;             //
 	TxHeader.ExtId = 0x00;                          //
 	TxHeader.IDE = CAN_ID_STD ;                 // 
 	TxHeader.RTR = CAN_RTR_DATA;                    // 
-	TxHeader.DLC = 4;  
+	TxHeader.DLC = 8;  
 }
 /* USER CODE END 0 */
 
@@ -212,6 +277,16 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
+	mms.p[0] = &mms.Source;
+	mms.p[1] = &mms.BtnPrev;
+	mms.p[2] = &mms.BtnNext;
+	mms.p[3] = &mms.BtnMuteOff;
+	mms.p[4] = &mms.BtnMuteOn;
+	mms.p[5] = &mms.BtnMuteTgl;
+	mms.p[6] = &mms.BtnVolMinus;
+	mms.p[7] = &mms.BtnVolPlus;
+	mms.p[8] = &mms.BtnCallAnsw;
+	mms.p[9] = &mms.BtnCallRej;
   /* USER CODE END 1 */
   
 
@@ -248,6 +323,11 @@ int main(void)
 	freq_a = HAL_RCC_GetHCLKFreq();
   while (1)
   {
+		if (flag.can_rx)
+		{
+			flag.can_rx = 0;
+			canToUartCommands(&mms);
+		}
 		if (pwr_state == toSleep)
 		{
 			//HAL_CAN_RequestSleep(&hcan);
