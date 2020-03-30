@@ -23,7 +23,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "string.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -94,6 +95,8 @@ FlagTypeDef flag;
 
 MMSCommandsTypeDef mms;
 
+RingBufTypeDef ringBuf_btCommands;
+uint8_t cycleBuf_count = 0;	//dbg
 
 /* USER CODE END PV */
 
@@ -144,7 +147,7 @@ void HAL_CAN_RxFIFO0MsgPendingCallback(CAN_HandleTypeDef* hcan)
 	mms.BtnMuteOn = 	(rx_buf[0]&0x08)>>3;
 	mms.BtnMuteTgl = 	(rx_buf[0]&0x04)>>2;
 	mms.BtnVolMinus = (rx_buf[0]&0x02)>>1;
-	mms.BtnVolPlus = 	(rx_buf[1]&0x01);
+	mms.BtnVolPlus = 	(rx_buf[0]&0x01);
 	flag.can_rx = 1;
 }
 void HAL_CAN_WakeUpFromRxMsgCallback(CAN_HandleTypeDef *hcan)
@@ -179,27 +182,33 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 }
 void canToUartCommands(MMSCommandsTypeDef* mms_t)
 {
-	/*if (mms_t->Source == 0x02)	//BT is on
-	{*/
+		if (mms_t->Source == 0x02)	//BT is on
+		{
+			RING_Put(toOn, &ringBuf_btCommands);
+		}
+		else
+		{
+			RING_Put(toOff, &ringBuf_btCommands);
+		}
 		if (mms_t->BtnCallAnsw)
 		{
 			mms_t->BtnCallAnsw = 0;
-			
+			RING_Put(toAnswCall, &ringBuf_btCommands);
 		}			
 		if(mms_t->BtnCallRej)
 		{
 			mms_t->BtnCallRej = 0;
-			
+			RING_Put(toRefCall, &ringBuf_btCommands);
 		}
 		if (mms_t->BtnPrev)
 		{
 			mms_t->BtnPrev = 0;
-			
+			RING_Put(toRedial/*временно*/, &ringBuf_btCommands);
 		}
 		if (mms_t->BtnNext)
 		{
 			mms_t->BtnNext = 0;
-			
+			RING_Put(toHgUp/*временно*/, &ringBuf_btCommands);
 		}
 		if (mms_t->BtnMuteTgl)
 		{
@@ -211,22 +220,22 @@ void canToUartCommands(MMSCommandsTypeDef* mms_t)
 		if (mms_t->BtnMuteOff)
 		{
 			mms_t->BtnMuteOff = 0;
-			
+			RING_Put(toNop/*временно*/, &ringBuf_btCommands);
 		}
 		if (mms_t->BtnMuteOn)
 		{
 			mms_t->BtnMuteOn = 0;
-		
+			RING_Put(toNop/*временно*/, &ringBuf_btCommands);
 		}
 		if (mms_t->BtnVolMinus)
 		{
 			mms_t->BtnVolMinus = 0;
-			
+			RING_Put(toVolDn, &ringBuf_btCommands);
 		}
 		if (mms_t->BtnVolPlus)
 		{
 			mms_t->BtnVolPlus = 0;
-		
+			RING_Put(toVolUp, &ringBuf_btCommands);
 		}
 	/*}
 	else if (mms_t->Source == 0x03)	//FM is on
@@ -327,6 +336,17 @@ int main(void)
 		{
 			flag.can_rx = 0;
 			canToUartCommands(&mms);
+		}
+		if (HAL_GetTick() - bt.ticks > 100)
+		{
+			bt.ticks = HAL_GetTick();
+			cycleBuf_count = RING_GetCount(&ringBuf_btCommands);
+			if (cycleBuf_count) 
+			{
+				bt.command = RING_Pop(&ringBuf_btCommands);
+				HAL_UART_Transmit(&huart2, (uint8_t*)&bt_commands[bt.command][0], strlen(&bt_commands[bt.command][0]), 100);
+				bt.command = toNop;
+			}
 		}
 		if (pwr_state == toSleep)
 		{
@@ -554,7 +574,35 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void RING_Put(BtCommandTypeDef command, RingBufTypeDef* buf)
+{
+		buf->buffer[buf->idxIn++]= command;  
+    if (buf->idxIn >= CYCLE_BUF_SIZE_x) buf->idxIn = 0;
+}
+BtCommandTypeDef RING_Pop(RingBufTypeDef* buf)
+{
+	BtCommandTypeDef retval = buf->buffer[buf->idxOut++];
+	if (buf->idxOut >= CYCLE_BUF_SIZE_x) buf->idxOut = 0;
+	return retval;
+}
+uint8_t RING_GetCount(RingBufTypeDef* buf)
+{
+    uint8_t retval = 0;
+    if (buf->idxIn < buf->idxOut) retval = CYCLE_BUF_SIZE_x + buf->idxIn - buf->idxOut;
+    else retval = buf->idxIn - buf->idxOut;
+    return retval;
+}
+void RING_Clear(RingBufTypeDef* buf)
+{
+    buf->idxIn = 0;
+    buf->idxOut = 0;
+}/*
+void RING_Init(RingBufTypeDef* buf)
+{
+    buf->size = size;
+    buf->buffer = test_array[][];//(uint8_t*) malloc(size);
+    RING_Clear(buf);
+}*/
 /* USER CODE END 4 */
 
 /**

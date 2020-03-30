@@ -32,16 +32,48 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#define CYCLE_BUF_SIZE_x 8
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+#define BT_ON 			"COM+PWOS\r\n"
+#define BT_OFF 			"COM+PWDS\r\n"
+#define BT_RES 			"COM+REBOOT\r\n"
+#define BT_VOL_P		"COM+VP\r\n"
+#define BT_VOL_M		"COM+VD\r\n"
+#define BT_VOL_Q		"COM+GV\r\n"
+#define BT_MODE_BT	"COM+MBT\r\n"
+#define BT_MODE_Q		"COM+IQ\r\n"
+#define	BT_PAIR			"BT+PR\r\n"
+#define	BT_CON_LAST	"BT+AC\r\n"
+#define	BT_DISCON		"BT+DC\r\n"
+#define BT_ANSW_CALL		"BT+CA\r\n"
+#define BT_REF_CALL 		"BT+CJ\r\n"
+#define BT_HANGUP_CALL	"BT+CE\r\n"
+#define BT_REDIAL		"BT+CR\r\n"
+//char *c[]={"COM+PWOS\r\n","COM+PWDS\r\n","COM+REBOOT\r\n"};
+static const char bt_commands [][15] = {
+{0},BT_ON,	BT_OFF,	BT_RES, BT_VOL_P, BT_VOL_M, BT_VOL_Q, BT_MODE_BT, BT_MODE_Q, BT_PAIR, BT_CON_LAST, BT_DISCON, BT_ANSW_CALL, BT_REF_CALL, BT_HANGUP_CALL, BT_REDIAL
+};
 typedef enum
 {
 	toNop,
 	toOn,
-	toOff
+	toOff,
+	toRst,
+	toVolUp,
+	toVolDn,
+	toVolQ,
+	toModeBt,
+	toModeQ,
+	toPair,
+	toConLst,
+	toDiscon,
+	toAnswCall,
+	toRefCall,
+	toHgUp,
+	toRedial
 } BtCommandTypeDef;
 typedef enum
 {
@@ -54,13 +86,23 @@ typedef struct
   uint8_t short_resp[8];     
 	uint8_t long_resp[32]; 
 }BtRxMsgTypeDef;
-typedef struct
+/*typedef struct
 {
 	BtCommandTypeDef command;
 	
+	BtRxMsgTypeDef*            pBtRxMsg;     //!< Pointer to receive structure  
+	//BtTxMsgTypeDef*            pBtTxMsg;     //!< Pointer to transmit structure  
+	uint8_t rx;
+} BtModuleTypeDef;*/
+typedef struct
+{
+	BtCommandTypeDef command;
+	BtCommandTypeDef command_buf[8];
+	uint8_t var;
+	uint8_t rx_buf[10];
 	BtRxMsgTypeDef*            pBtRxMsg;     /*!< Pointer to receive structure  */
 	//BtTxMsgTypeDef*            pBtTxMsg;     /*!< Pointer to transmit structure  */
-	uint8_t rx;
+	uint32_t ticks;
 } BtModuleTypeDef;
 typedef struct 
 {
@@ -76,6 +118,14 @@ typedef struct
 	uint8_t BtnCallRej;
 	uint8_t *p[10];
 } MMSCommandsTypeDef;
+
+typedef struct
+{
+	BtCommandTypeDef buffer[CYCLE_BUF_SIZE_x];
+	uint16_t idxIn;
+  uint16_t idxOut;
+} RingBufTypeDef;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -92,7 +142,12 @@ typedef struct
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void RING_Put(BtCommandTypeDef btCommand/*uint8_t* array*/, RingBufTypeDef* buf);
+BtCommandTypeDef RING_Pop(RingBufTypeDef *buf);
+uint8_t RING_GetCount(RingBufTypeDef *buf);
+int32_t RING_ShowSymbol(uint16_t symbolNumber ,RingBufTypeDef *buf);
+void RING_Clear(RingBufTypeDef* buf);
+void RING_Init(RingBufTypeDef *buf);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
