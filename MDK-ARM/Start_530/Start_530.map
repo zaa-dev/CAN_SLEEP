@@ -742,10 +742,10 @@ Image Symbol Table
     i.canToUartCommands                      0x08001d40   Section        0  main.o(i.canToUartCommands)
     i.can_user_settings                      0x08001df8   Section        0  main.o(i.can_user_settings)
     i.main                                   0x08001e74   Section        0  main.o(i.main)
-    .constdata                               0x0800205c   Section      240  main.o(.constdata)
-    bt_commands                              0x0800205c   Data         240  main.o(.constdata)
-    .constdata                               0x0800214c   Section       16  system_stm32f1xx.o(.constdata)
-    .constdata                               0x0800215c   Section        8  system_stm32f1xx.o(.constdata)
+    .constdata                               0x0800205c   Section      330  main.o(.constdata)
+    bt_commands                              0x0800205c   Data         330  main.o(.constdata)
+    .constdata                               0x080021a6   Section       16  system_stm32f1xx.o(.constdata)
+    .constdata                               0x080021b6   Section        8  system_stm32f1xx.o(.constdata)
     .data                                    0x20000000   Section       60  main.o(.data)
     trig                                     0x20000004   Data           1  main.o(.data)
     .data                                    0x2000003c   Section       12  stm32f1xx_hal.o(.data)
@@ -914,10 +914,10 @@ Image Symbol Table
     canToUartCommands                        0x08001d41   Thumb Code   174  main.o(i.canToUartCommands)
     can_user_settings                        0x08001df9   Thumb Code   112  main.o(i.can_user_settings)
     main                                     0x08001e75   Thumb Code   458  main.o(i.main)
-    AHBPrescTable                            0x0800214c   Data          16  system_stm32f1xx.o(.constdata)
-    APBPrescTable                            0x0800215c   Data           8  system_stm32f1xx.o(.constdata)
-    Region$$Table$$Base                      0x08002164   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x08002184   Number         0  anon$$obj.o(Region$$Table)
+    AHBPrescTable                            0x080021a6   Data          16  system_stm32f1xx.o(.constdata)
+    APBPrescTable                            0x080021b6   Data           8  system_stm32f1xx.o(.constdata)
+    Region$$Table$$Base                      0x080021c0   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x080021e0   Number         0  anon$$obj.o(Region$$Table)
     len                                      0x20000000   Data           1  main.o(.data)
     shake_int                                0x20000001   Data           1  main.o(.data)
     pwr_state                                0x20000002   Data           1  main.o(.data)
@@ -960,9 +960,9 @@ Memory Map of the image
 
   Image Entry point : 0x080000ed
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x000021d0, Max: 0x00010000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x0000222c, Max: 0x00010000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x00002184, Max: 0x00010000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x000021e0, Max: 0x00010000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -1089,19 +1089,20 @@ Memory Map of the image
     0x08001d40   0x08001d40   0x000000b8   Code   RO           28    i.canToUartCommands  main.o
     0x08001df8   0x08001df8   0x0000007c   Code   RO           29    i.can_user_settings  main.o
     0x08001e74   0x08001e74   0x000001e8   Code   RO           30    i.main              main.o
-    0x0800205c   0x0800205c   0x000000f0   Data   RO           32    .constdata          main.o
-    0x0800214c   0x0800214c   0x00000010   Data   RO         2079    .constdata          system_stm32f1xx.o
-    0x0800215c   0x0800215c   0x00000008   Data   RO         2080    .constdata          system_stm32f1xx.o
-    0x08002164   0x08002164   0x00000020   Data   RO         2137    Region$$Table       anon$$obj.o
+    0x0800205c   0x0800205c   0x0000014a   Data   RO           32    .constdata          main.o
+    0x080021a6   0x080021a6   0x00000010   Data   RO         2079    .constdata          system_stm32f1xx.o
+    0x080021b6   0x080021b6   0x00000008   Data   RO         2080    .constdata          system_stm32f1xx.o
+    0x080021be   0x080021be   0x00000002   PAD
+    0x080021c0   0x080021c0   0x00000020   Data   RO         2137    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x08002184, Size: 0x00000638, Max: 0x00005000, ABSOLUTE)
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x080021e0, Size: 0x00000638, Max: 0x00005000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x08002184   0x0000003c   Data   RW           33    .data               main.o
-    0x2000003c   0x080021c0   0x0000000c   Data   RW         1127    .data               stm32f1xx_hal.o
-    0x20000048   0x080021cc   0x00000004   Data   RW         2081    .data               system_stm32f1xx.o
+    0x20000000   0x080021e0   0x0000003c   Data   RW           33    .data               main.o
+    0x2000003c   0x0800221c   0x0000000c   Data   RW         1127    .data               stm32f1xx_hal.o
+    0x20000048   0x08002228   0x00000004   Data   RW         2081    .data               system_stm32f1xx.o
     0x2000004c        -       0x000001ec   Zero   RW           31    .bss                main.o
     0x20000238        -       0x00000400   Zero   RW            1    STACK               startup_stm32f103xb.o
 
@@ -1113,7 +1114,7 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-      1528        126        240         60        492     415474   main.o
+      1528        126        330         60        492     415734   main.o
         36          8        236          0       1024        780   startup_stm32f103xb.o
        208         32          0         12          0       7124   stm32f1xx_hal.o
       2042         78          0          0          0      16975   stm32f1xx_hal_can.o
@@ -1129,9 +1130,9 @@ Image component sizes
         72         16         24          4          0       1087   system_stm32f1xx.o
 
     ----------------------------------------------------------------------
-      7910        504        532         76       1516     897563   Object Totals
+      7910        504        624         76       1516     897823   Object Totals
          0          0         32          0          0          0   (incl. Generated)
-        20          0          0          0          0          0   (incl. Padding)
+        20          0          2          0          0          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -1170,15 +1171,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      8048        520        532         76       1516     893279   Grand Totals
-      8048        520        532         76       1516     893279   ELF Image Totals
-      8048        520        532         76          0          0   ROM Totals
+      8048        520        624         76       1516     893539   Grand Totals
+      8048        520        624         76       1516     893539   ELF Image Totals
+      8048        520        624         76          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                 8580 (   8.38kB)
+    Total RO  Size (Code + RO Data)                 8672 (   8.47kB)
     Total RW  Size (RW Data + ZI Data)              1592 (   1.55kB)
-    Total ROM Size (Code + RO Data + RW Data)       8656 (   8.45kB)
+    Total ROM Size (Code + RO Data + RW Data)       8748 (   8.54kB)
 
 ==============================================================================
 

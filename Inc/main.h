@@ -52,9 +52,18 @@ extern "C" {
 #define BT_REF_CALL 		"BT+CJ\r\n"
 #define BT_HANGUP_CALL	"BT+CE\r\n"
 #define BT_REDIAL		"BT+CR\r\n"
+
+#define BT_STATUS_QUERY	"COM+IQ\r\n"
+#define BT_VOLUME_QUERY "COM+GV\r\n"
+#define BT_NEXT_TRACK		"COM+PN\r\n"
+#define BT_PREV_TRACK		"COM+PV\r\n"
+#define BT_PLAY_MUSIC		"COM+PA\r\n"
+#define BT_PAUS_MUSIC		"COM+PU\r\n"
+
 //char *c[]={"COM+PWOS\r\n","COM+PWDS\r\n","COM+REBOOT\r\n"};
 static const char bt_commands [][15] = {
-{0},BT_ON,	BT_OFF,	BT_RES, BT_VOL_P, BT_VOL_M, BT_VOL_Q, BT_MODE_BT, BT_MODE_Q, BT_PAIR, BT_CON_LAST, BT_DISCON, BT_ANSW_CALL, BT_REF_CALL, BT_HANGUP_CALL, BT_REDIAL
+{0},BT_ON,	BT_OFF,	BT_RES, BT_VOL_P, BT_VOL_M, BT_VOL_Q, BT_MODE_BT, BT_MODE_Q, BT_PAIR, BT_CON_LAST, BT_DISCON, BT_ANSW_CALL, BT_REF_CALL, BT_HANGUP_CALL, BT_REDIAL,
+BT_STATUS_QUERY, BT_VOLUME_QUERY, BT_NEXT_TRACK, BT_PREV_TRACK, BT_PLAY_MUSIC, BT_PAUS_MUSIC,
 };
 typedef enum
 {
@@ -73,7 +82,14 @@ typedef enum
 	toAnswCall,
 	toRefCall,
 	toHgUp,
-	toRedial
+	toRedial,
+	
+	quStatus,
+	quVol,
+	toNextTrack,
+	toPrevTrack,
+	toPlayTrack,
+	toPausTrack
 } BtCommandTypeDef;
 typedef enum
 {
